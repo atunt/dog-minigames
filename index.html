@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feed the Ants Game - By Atunt</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #fceabb, #f8b500);
+      overflow: hidden;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      color: #4e342e;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      background: #fff8dc;
+      border: 5px solid #795548;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    .exit-link {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .exit-link a {
+      background-color: #4caf50;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    .exit-link a:hover {
+      background-color: #388e3c;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐜 Feed the Ants!</h1>
+  <canvas id="antCanvas" width="600" height="400"></canvas>
+  <div class="exit-link">
+    <a href="https://atunt.com/shop/" target="_blank">Visit Atunt Store 🛒</a>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('antCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const ants = [];
+    const food = [];
+
+    const antImage = new Image();
+    antImage.src = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'; // cute ant icon
+
+    class Ant {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = 32;
+        this.speed = 1 + Math.random() * 1.5;
+        this.target = null;
+      }
+      draw() {
+        ctx.drawImage(antImage, this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+      }
+      update() {
+        if (this.target) {
+          const dx = this.target.x - this.x;
+          const dy = this.target.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 1) {
+            this.x += (dx / dist) * this.speed;
+            this.y += (dy / dist) * this.speed;
+          } else {
+            this.target = null;
+          }
+        } else if (food.length > 0) {
+          this.target = food[Math.floor(Math.random() * food.length)];
+        }
+      }
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      food.push({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        life: 300
+      });
+    });
+
+    function drawFood() {
+      for (let i = food.length - 1; i >= 0; i--) {
+        let f = food[i];
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#8d6e63';
+        ctx.fill();
+        f.life--;
+        if (f.life <= 0) food.splice(i, 1);
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawFood();
+      ants.forEach(ant => {
+        ant.update();
+        ant.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    // Initialize ants
+    for (let i = 0; i < 8; i++) {
+      ants.push(new Ant());
+    }
+
+    animate();
+  </script>
+</body>
+</html>
